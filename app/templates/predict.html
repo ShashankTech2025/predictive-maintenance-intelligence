@@ -1,0 +1,236 @@
+{% extends "base.html" %}
+
+{% block title %}Predict Machine Failure{% endblock %}
+{% block page_title %}Sensor Diagnostics &amp; Machine Failure Prediction{% endblock %}
+
+{% block content %}
+<div class="container-fluid p-0">
+  
+  <div class="row g-4">
+    <!-- Left Column: Input Form -->
+    <div class="col-12 col-xl-5">
+      <div class="app-card">
+        <div class="card-header-clean">
+          <h2><i class="bi bi-sliders text-primary"></i> Sensor Telemetry Input</h2>
+          <span class="badge bg-light text-muted border" style="font-size: 0.72rem;">XGBoost Inference</span>
+        </div>
+
+        <!-- Quick Presets -->
+        <div class="mb-3">
+          <label class="form-label-custom">Quick Simulation Presets</label>
+          <div class="d-flex flex-wrap gap-2">
+            <button type="button" class="btn btn-sm btn-outline-success" id="preset-normal">
+              <i class="bi bi-shield-check"></i> Normal (Machine A)
+            </button>
+            <button type="button" class="btn btn-sm btn-outline-danger" id="preset-high-risk">
+              <i class="bi bi-exclamation-triangle"></i> High Risk (Machine B)
+            </button>
+            <button type="button" class="btn btn-sm btn-outline-warning" id="preset-heavy-press">
+              <i class="bi bi-gear-wide-connected"></i> Heavy Duty (Press C)
+            </button>
+          </div>
+        </div>
+
+        <form id="prediction-form">
+          <!-- Machine Selection -->
+          <div class="row g-2 mb-3">
+            <div class="col-7">
+              <label class="form-label-custom" for="pred-machine-select">Target Machine <span class="text-danger">*</span></label>
+              <select id="pred-machine-select" class="form-select-custom" required>
+                <option value="" disabled selected>Loading registered fleet...</option>
+                <option value="__NEW__">+ Register / Custom Machine</option>
+              </select>
+            </div>
+            <div class="col-5">
+              <label class="form-label-custom" for="pred-machine-type">Variant Type <span class="text-danger">*</span></label>
+              <select id="pred-machine-type" class="form-select-custom" required>
+                <option value="L">Type L (Light)</option>
+                <option value="M">Type M (Medium)</option>
+                <option value="H">Type H (Heavy)</option>
+              </select>
+            </div>
+          </div>
+
+          <div id="new-machine-name-container" class="mb-3" style="display: none;">
+            <label class="form-label-custom" for="pred-custom-name">Custom Machine Name <span class="text-danger">*</span></label>
+            <input type="text" id="pred-custom-name" class="form-control-custom" placeholder="e.g. Test Spindle Unit 09">
+          </div>
+
+          <!-- Sensor Measurements -->
+          <div class="row g-3 mb-3">
+            <div class="col-6">
+              <label class="form-label-custom" for="input-air-temp">
+                Air Temperature [K] <span class="text-danger">*</span>
+              </label>
+              <input type="number" step="0.1" id="input-air-temp" class="form-control-custom" placeholder="e.g. 300.1" value="300.1" required>
+              <div class="form-help">Ambient air temp (~295 - 305 K)</div>
+            </div>
+
+            <div class="col-6">
+              <label class="form-label-custom" for="input-proc-temp">
+                Process Temperature [K] <span class="text-danger">*</span>
+              </label>
+              <input type="number" step="0.1" id="input-proc-temp" class="form-control-custom" placeholder="e.g. 310.2" value="310.2" required>
+              <div class="form-help">Chamber temp (~305 - 315 K)</div>
+            </div>
+
+            <div class="col-6">
+              <label class="form-label-custom" for="input-rpm">
+                Rotational Speed [rpm] <span class="text-danger">*</span>
+              </label>
+              <input type="number" step="1" id="input-rpm" class="form-control-custom" placeholder="e.g. 1500" value="1500" required>
+              <div class="form-help">Spindle speed (&gt; 0 rpm)</div>
+            </div>
+
+            <div class="col-6">
+              <label class="form-label-custom" for="input-torque">
+                Torque [Nm] <span class="text-danger">*</span>
+              </label>
+              <input type="number" step="0.1" id="input-torque" class="form-control-custom" placeholder="e.g. 40.0" value="40.0" required>
+              <div class="form-help">Motor torque load (&ge; 0 Nm)</div>
+            </div>
+
+            <div class="col-12">
+              <label class="form-label-custom" for="input-tool-wear">
+                Tool Wear [min] <span class="text-danger">*</span>
+              </label>
+              <input type="number" step="1" id="input-tool-wear" class="form-control-custom" placeholder="e.g. 50" value="50" required>
+              <div class="form-help">Operating minutes on tool (alert threshold &ge; 200 min)</div>
+            </div>
+          </div>
+
+          <!-- Options -->
+          <div class="p-3 bg-light rounded mb-3">
+            <div class="form-check form-switch mb-2">
+              <input class="form-check-input" type="checkbox" id="check-save-db" checked>
+              <label class="form-check-label small text-secondary fw-semibold" for="check-save-db">
+                Record assessment in SQLite database
+              </label>
+            </div>
+            <div class="form-check form-switch">
+              <input class="form-check-input" type="checkbox" id="check-include-xai" checked>
+              <label class="form-check-label small text-secondary fw-semibold" for="check-include-xai">
+                Compute SHAP TreeExplainer attributions
+              </label>
+            </div>
+          </div>
+
+          <!-- Submit Button -->
+          <button type="submit" class="btn-primary-custom w-100 py-2 justify-content-center" id="btn-run-prediction">
+            <i class="bi bi-cpu-fill"></i>
+            <span>Run Predictive Failure Analysis</span>
+          </button>
+        </form>
+      </div>
+    </div>
+
+    <!-- Right Column: Prediction Assessment & Diagnostics -->
+    <div class="col-12 col-xl-7">
+      
+      <!-- Initial Placeholder State -->
+      <div id="results-placeholder" class="app-card h-100 d-flex flex-column align-items-center justify-content-center text-center p-5">
+        <div class="empty-state">
+          <i class="bi bi-cpu fs-1 text-primary"></i>
+          <h3>Ready for Diagnostics</h3>
+          <p>
+            Select a machine and input sensor telemetry readings on the left, or choose a simulation preset to generate failure predictions and SHAP explainability insights.
+          </p>
+          <div class="badge bg-light text-muted border p-2">
+            Classification Threshold: <b>0.40 (40.0%)</b> &bull; Model: <b>XGBoost</b>
+          </div>
+        </div>
+      </div>
+
+      <!-- Live Results Card (Hidden until submitted) -->
+      <div id="results-panel" style="display: none;">
+        <!-- Top Status Bar Card -->
+        <div class="app-card mb-3">
+          <div class="d-flex flex-wrap align-items-center justify-content-between gap-3">
+            <div>
+              <div class="d-flex align-items-center gap-2 mb-1">
+                <h2 class="fs-5 fw-bold text-primary m-0" id="res-machine-title">Machine Diagnostics</h2>
+                <span class="badge-type" id="res-machine-type">Type L</span>
+              </div>
+              <small class="text-muted" id="res-timestamp">Assessment generated just now</small>
+            </div>
+
+            <div class="d-flex align-items-center gap-2">
+              <span id="res-status-badge"></span>
+              <span id="res-risk-badge"></span>
+            </div>
+          </div>
+
+          <hr class="my-3">
+
+          <!-- Probability Meter Row -->
+          <div class="row g-3 align-items-center">
+            <div class="col-12 col-sm-4 text-center border-end">
+              <div class="text-muted small text-uppercase fw-semibold mb-1">Failure Probability</div>
+              <div class="display-6 fw-bold" id="res-probability">0.0%</div>
+              <small class="text-muted">Threshold: 40.0%</small>
+            </div>
+
+            <div class="col-12 col-sm-8">
+              <div class="row g-2">
+                <div class="col-6">
+                  <div class="p-2 border rounded bg-light">
+                    <small class="text-muted d-block">&Delta;T (Thermal Gradient)</small>
+                    <strong class="fs-6 text-primary" id="res-temp-diff">0.0 K</strong>
+                  </div>
+                </div>
+                <div class="col-6">
+                  <div class="p-2 border rounded bg-light">
+                    <small class="text-muted d-block">Mechanical Power</small>
+                    <strong class="fs-6 text-primary" id="res-mech-power">0.00 kW</strong>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Maintenance Action Directives Card -->
+        <div class="app-card mb-3">
+          <div class="card-header-clean">
+            <h2><i class="bi bi-tools text-primary"></i> Prescribed Maintenance Directives</h2>
+          </div>
+          <div id="res-recommendations-list"></div>
+          <div class="mt-2 text-muted" style="font-size: 0.72rem;" id="res-disclaimer"></div>
+        </div>
+
+        <!-- Explainable AI (SHAP) Waterfall / Feature Attribution Chart -->
+        <div class="app-card mb-3" id="shap-card">
+          <div class="card-header-clean">
+            <h2><i class="bi bi-lightbulb-fill text-warning"></i> Explainable AI &bull; Feature Risk Contributions (SHAP)</h2>
+            <span class="text-muted" style="font-size: 0.74rem;">TreeExplainer Margin Attributions</span>
+          </div>
+          
+          <div class="alert alert-light border small text-secondary mb-3" id="shap-summary-box"></div>
+
+          <div id="shap-chart" style="height: 320px; width: 100%;"></div>
+        </div>
+
+        <!-- Action Buttons -->
+        <div class="d-flex justify-content-between align-items-center">
+          <button type="button" class="btn btn-outline-secondary btn-sm" id="btn-reset-prediction">
+            <i class="bi bi-arrow-repeat"></i> Run Another Assessment
+          </button>
+          
+          <a href="#" id="btn-download-pdf" target="_blank" class="btn-primary-custom btn-sm">
+            <i class="bi bi-file-earmark-pdf-fill"></i>
+            <span>Download Engineering Certificate (PDF)</span>
+          </a>
+        </div>
+
+      </div>
+
+    </div>
+  </div>
+
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script src="{{ url_for('static', filename='js/predict.js') }}"></script>
+{% endblock %}
+

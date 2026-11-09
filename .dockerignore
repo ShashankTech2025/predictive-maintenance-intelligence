@@ -1,0 +1,60 @@
+# ==============================================================================
+# Docker Build Context Exclusions
+# Predictive Maintenance & Equipment Failure Intelligence System
+# ==============================================================================
+
+# Version Control & Metadata
+.git/
+.gitignore
+.gitattributes
+
+# Environment Variables & Secrets
+.env
+.env.*
+.env.local
+!.env.example
+
+# Temporary Databases & Backups (CRITICAL SECURITY EXCLUSIONS)
+database/*backup*.db
+database/*.bak
+database/test_*.db
+*.db-journal
+*.db-wal
+*.db-shm
+
+# Offline Training Datasets (Not required for production inference)
+data/
+data/raw/
+data/processed/
+
+# Research & Development Jupyter Notebooks
+notebooks/
+.ipynb_checkpoints/
+
+# Automated Test Suites & Fixtures
+tests/
+.pytest_cache/
+.coverage
+htmlcov/
+.tox/
+
+# Local Scratch & Temporary Scripts
+scratch/
+reports/screenshots/
+
+# Python Bytecode & Virtual Environments
+__pycache__/
+*.py[cod]
+*$py.class
+venv/
+.venv/
+env/
+
+# Workstation & IDE Artifacts
+.vscode/
+.idea/
+*.sublime-project
+*.sublime-workspace
+.DS_Store
+Thumbs.db
+

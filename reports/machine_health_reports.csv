@@ -1,0 +1,3 @@
+Machine ID,Machine Type,Failure Probability (%),Machine Status,Risk Level,Temperature Difference (K),Mechanical Power (kW),Maintenance Recommendations
+Machine A,L,0.05,NORMAL,LOW,10.1,6.28,Low failure risk: Continue routine monitoring.
+Machine B,M,85.46,FAILURE RISK,HIGH,9.0,8.06,High failure risk: Arrange prompt machine inspection. | High tool wear: Inspect the cutting tool and assess replacement. | Elevated torque: Inspect mechanical load and drive components.

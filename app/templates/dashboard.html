@@ -1,0 +1,159 @@
+{% extends "base.html" %}
+
+{% block title %}Overview Dashboard{% endblock %}
+{% block page_title %}Fleet Health &amp; Operations Overview{% endblock %}
+
+{% block content %}
+<div class="container-fluid p-0">
+  
+  <!-- KPI Metrics Row -->
+  <div class="row g-3 mb-4">
+    <!-- Total Registered Machines -->
+    <div class="col-12 col-sm-6 col-xl-3">
+      <div class="kpi-card">
+        <div>
+          <div class="kpi-label">Registered Fleet</div>
+          <div class="kpi-value" id="kpi-total-machines"><span class="loading-spinner"></span></div>
+          <div class="kpi-subtext" id="kpi-types-breakdown">Active industrial units</div>
+        </div>
+        <div class="kpi-icon-wrap kpi-blue">
+          <i class="bi bi-hdd-network-fill"></i>
+        </div>
+      </div>
+    </div>
+
+    <!-- Active High-Risk Alerts -->
+    <div class="col-12 col-sm-6 col-xl-3">
+      <div class="kpi-card">
+        <div>
+          <div class="kpi-label">High-Risk Alerts</div>
+          <div class="kpi-value text-danger" id="kpi-high-risk"><span class="loading-spinner"></span></div>
+          <div class="kpi-subtext">Immediate maintenance required</div>
+        </div>
+        <div class="kpi-icon-wrap kpi-red">
+          <i class="bi bi-exclamation-octagon-fill"></i>
+        </div>
+      </div>
+    </div>
+
+    <!-- Total Predictions Logged -->
+    <div class="col-12 col-sm-6 col-xl-3">
+      <div class="kpi-card">
+        <div>
+          <div class="kpi-label">Predictions Logged</div>
+          <div class="kpi-value" id="kpi-total-predictions"><span class="loading-spinner"></span></div>
+          <div class="kpi-subtext">Cumulative ML assessments</div>
+        </div>
+        <div class="kpi-icon-wrap kpi-green">
+          <i class="bi bi-cpu-fill"></i>
+        </div>
+      </div>
+    </div>
+
+    <!-- Monitored Sensor Readings -->
+    <div class="col-12 col-sm-6 col-xl-3">
+      <div class="kpi-card">
+        <div>
+          <div class="kpi-label">Sensor Telemetry</div>
+          <div class="kpi-value" id="kpi-sensor-readings"><span class="loading-spinner"></span></div>
+          <div class="kpi-subtext">Logged physical observations</div>
+        </div>
+        <div class="kpi-icon-wrap kpi-amber">
+          <i class="bi bi-activity"></i>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Charts Row -->
+  <div class="row g-3 mb-4">
+    <!-- Risk Distribution Donut -->
+    <div class="col-12 col-lg-5">
+      <div class="app-card h-100 mb-0">
+        <div class="card-header-clean">
+          <h2><i class="bi bi-pie-chart-fill text-primary"></i> Current Fleet Risk Distribution</h2>
+          <span class="text-muted" style="font-size: 0.75rem;">Latest status per unit</span>
+        </div>
+        <div id="chart-risk-distribution" style="height: 280px; width: 100%;">
+          <div class="d-flex align-items-center justify-content-center h-100">
+            <span class="loading-spinner"></span>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Machine-wise Failure Probability -->
+    <div class="col-12 col-lg-7">
+      <div class="app-card h-100 mb-0">
+        <div class="card-header-clean">
+          <h2><i class="bi bi-bar-chart-line-fill text-primary"></i> Unit Failure Probability Index</h2>
+          <span class="badge bg-light text-secondary border" style="font-size: 0.72rem;">Threshold: 40.0%</span>
+        </div>
+        <div id="chart-machine-probabilities" style="height: 280px; width: 100%;">
+          <div class="d-flex align-items-center justify-content-center h-100">
+            <span class="loading-spinner"></span>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Current Fleet Status Table -->
+  <div class="app-card mb-4">
+    <div class="card-header-clean">
+      <h2><i class="bi bi-shield-check text-primary"></i> Current Machine Health Status</h2>
+      <a href="{{ url_for('web.machines_view') }}" class="btn-secondary-custom btn-sm">
+        <span>View Full Fleet</span>
+        <i class="bi bi-arrow-right"></i>
+      </a>
+    </div>
+
+    <div class="table-responsive">
+      <table class="table-industrial" id="fleet-status-table">
+        <thead>
+          <tr>
+            <th>Machine</th>
+            <th>Type</th>
+            <th>Failure Probability</th>
+            <th>Operational Status</th>
+            <th>Risk Tier</th>
+            <th>Last Assessed</th>
+            <th class="text-end">Actions</th>
+          </tr>
+        </thead>
+        <tbody id="fleet-status-tbody">
+          <tr>
+            <td colspan="7" class="text-center py-4">
+              <span class="loading-spinner"></span>
+              <div class="text-muted mt-2" style="font-size: 0.8rem;">Loading live machine telemetry...</div>
+            </td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+  <!-- Recent Maintenance Directives -->
+  <div class="app-card mb-0">
+    <div class="card-header-clean">
+      <h2><i class="bi bi-tools text-primary"></i> Active Maintenance Action Items</h2>
+      <a href="{{ url_for('web.maintenance_view') }}" class="btn-secondary-custom btn-sm">
+        <span>Manage Tasks</span>
+        <i class="bi bi-arrow-right"></i>
+      </a>
+    </div>
+
+    <div id="recent-maintenance-list">
+      <div class="text-center py-3">
+        <span class="loading-spinner"></span>
+      </div>
+    </div>
+  </div>
+
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script src="{{ url_for('static', filename='js/dashboard.js') }}"></script>
+{% endblock %}
+

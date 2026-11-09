@@ -1,0 +1,10 @@
+# ==============================================================================
+# Development & Testing Dependencies
+# Predictive Maintenance & Equipment Failure Intelligence System
+# ==============================================================================
+-r requirements.txt
+
+# Testing Framework & Automation
+pytest==9.0.3
+anyio==4.12.1
+

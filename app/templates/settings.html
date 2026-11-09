@@ -1,0 +1,195 @@
+{% extends "base.html" %}
+
+{% block title %}System Settings{% endblock %}
+{% block page_title %}System Diagnostics &amp; Operational Configurations{% endblock %}
+
+{% block content %}
+<div class="container-fluid p-0">
+
+  <div class="row g-4">
+    <!-- Card 1: Sensor Alert Rules & Thresholds -->
+    <div class="col-12 col-xl-6">
+      <div class="app-card h-100">
+        <div class="card-header-clean">
+          <h2><i class="bi bi-shield-exclamation text-primary"></i> Maintenance Alert Thresholds</h2>
+          <span class="badge bg-light text-secondary border">Configurable Parameters</span>
+        </div>
+
+        <p class="text-secondary small mb-3">
+          Rule-based maintenance heuristics evaluated alongside the XGBoost classification model to generate itemized equipment directives.
+        </p>
+
+        <div class="table-responsive mb-3">
+          <table class="table-industrial">
+            <thead>
+              <tr>
+                <th>Monitored Parameter</th>
+                <th>Alert Boundary</th>
+                <th>Prescribed Engineering Directive</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td class="fw-semibold">Tool Wear</td>
+                <td><span class="badge bg-danger-subtle text-danger border">&ge; 200.0 min</span></td>
+                <td class="small">Inspect cutting tool and assess immediate replacement.</td>
+              </tr>
+              <tr>
+                <td class="fw-semibold">Motor Torque</td>
+                <td><span class="badge bg-danger-subtle text-danger border">&ge; 55.0 Nm</span></td>
+                <td class="small">Inspect mechanical load and drive train components.</td>
+              </tr>
+              <tr>
+                <td class="fw-semibold">Rotational Speed</td>
+                <td><span class="badge bg-warning-subtle text-warning-emphasis border">&le; 1300.0 rpm</span></td>
+                <td class="small">Inspect spindle motor and electrical supply conditions.</td>
+              </tr>
+              <tr>
+                <td class="fw-semibold">Thermal Gradient (&Delta;T)</td>
+                <td><span class="badge bg-warning-subtle text-warning-emphasis border">&le; 8.0 K</span></td>
+                <td class="small">Verify heat dissipation and temperature sensor calibration.</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+
+        <div class="alert alert-light border small text-muted mb-0">
+          <i class="bi bi-info-circle me-1 text-primary"></i>
+          <strong>OEM Disclaimer:</strong> Sensor thresholds represent baseline operational triggers configured via environment variables (<code>TOOL_WEAR_ALERT_THRESHOLD</code>, <code>TORQUE_ALERT_THRESHOLD</code>, etc.). Industrial plants must calibrate these values against manufacturer machine specifications.
+        </div>
+      </div>
+    </div>
+
+    <!-- Card 2: Risk Tiering & Model Diagnostics -->
+    <div class="col-12 col-xl-6">
+      <div class="app-card h-100">
+        <div class="card-header-clean">
+          <h2><i class="bi bi-cpu text-primary"></i> ML Inference Architecture</h2>
+          <span class="badge bg-success-subtle text-success border">Model Online</span>
+        </div>
+
+        <div class="row g-2 mb-3">
+          <div class="col-sm-6">
+            <div class="p-2 border rounded bg-light">
+              <small class="text-muted d-block">ML Algorithm</small>
+              <strong class="text-primary">XGBoost Classifier</strong>
+            </div>
+          </div>
+          <div class="col-sm-6">
+            <div class="p-2 border rounded bg-light">
+              <small class="text-muted d-block">Classification Threshold</small>
+              <strong class="text-primary">0.40 (40.0% Probability)</strong>
+            </div>
+          </div>
+          <div class="col-sm-6">
+            <div class="p-2 border rounded bg-light">
+              <small class="text-muted d-block">Feature Preprocessor</small>
+              <strong class="text-primary">ColumnTransformer (8 &rarr; 10)</strong>
+            </div>
+          </div>
+          <div class="col-sm-6">
+            <div class="p-2 border rounded bg-light">
+              <small class="text-muted d-block">Explainable AI (XAI)</small>
+              <strong class="text-primary">SHAP TreeExplainer</strong>
+            </div>
+          </div>
+        </div>
+
+        <h3 class="fs-6 fw-bold text-secondary mb-2">Trained Input Feature Schema (10 Features):</h3>
+        <div class="d-flex flex-wrap gap-1 mb-3">
+          <span class="badge bg-light text-secondary border">Air_temperature_K</span>
+          <span class="badge bg-light text-secondary border">Process_temperature_K</span>
+          <span class="badge bg-light text-secondary border">Rotational_speed_rpm</span>
+          <span class="badge bg-light text-secondary border">Torque_Nm</span>
+          <span class="badge bg-light text-secondary border">Tool_wear_min</span>
+          <span class="badge bg-primary-subtle text-primary border">Temperature_Difference_K [FE]</span>
+          <span class="badge bg-primary-subtle text-primary border">Mechanical_Power_kW [FE]</span>
+          <span class="badge bg-light text-secondary border">Type_H</span>
+          <span class="badge bg-light text-secondary border">Type_L</span>
+          <span class="badge bg-light text-secondary border">Type_M</span>
+        </div>
+
+        <h3 class="fs-6 fw-bold text-secondary mb-2">Risk Classification Schema:</h3>
+        <div class="row g-2">
+          <div class="col-4">
+            <div class="p-2 border rounded border-success-subtle bg-success-subtle text-center">
+              <small class="d-block fw-bold text-success">LOW RISK</small>
+              <span class="small">&lt; 20.0%</span>
+            </div>
+          </div>
+          <div class="col-4">
+            <div class="p-2 border rounded border-warning-subtle bg-warning-subtle text-center">
+              <small class="d-block fw-bold text-warning-emphasis">MEDIUM RISK</small>
+              <span class="small">20.0% - 39.9%</span>
+            </div>
+          </div>
+          <div class="col-4">
+            <div class="p-2 border rounded border-danger-subtle bg-danger-subtle text-center">
+              <small class="d-block fw-bold text-danger">HIGH RISK</small>
+              <span class="small">&ge; 40.0%</span>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Card 3: Database & Storage Integrity -->
+    <div class="col-12">
+      <div class="app-card mb-0">
+        <div class="card-header-clean">
+          <h2><i class="bi bi-database-check text-primary"></i> Database Storage &amp; Persistence</h2>
+          <span class="badge bg-light text-secondary border" id="db-health-pill">Checking...</span>
+        </div>
+
+        <div class="row g-3">
+          <div class="col-12 col-md-4">
+            <div class="p-3 border rounded bg-light">
+              <small class="text-muted d-block">Active SQLite Database</small>
+              <code style="word-break: break-all;">database/predictive_maintenance.db</code>
+              <div class="text-success small mt-1"><i class="bi bi-check-circle-fill"></i> Foreign keys strictly enforced</div>
+            </div>
+          </div>
+
+          <div class="col-12 col-md-4">
+            <div class="p-3 border rounded bg-light">
+              <small class="text-muted d-block">Automatic Backup Protocol</small>
+              <div class="small fw-semibold text-primary">Pre-migration verified snapshots</div>
+              <div class="text-muted small mt-1">Backed up before schema enhancements</div>
+            </div>
+          </div>
+
+          <div class="col-12 col-md-4">
+            <div class="p-3 border rounded bg-light">
+              <small class="text-muted d-block">Cloud Persistence Strategy</small>
+              <div class="small fw-semibold text-secondary">Render Disk / Persistent Volume</div>
+              <div class="text-muted small mt-1">Mount database directory to persistent disk</div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+  document.addEventListener("DOMContentLoaded", async () => {
+    try {
+      const res = await API.getHealth();
+      const pill = document.getElementById("db-health-pill");
+      if (res.status === "healthy") {
+        pill.className = "badge bg-success-subtle text-success border border-success-subtle";
+        pill.innerHTML = `<i class="bi bi-check2"></i> Database &amp; ML Healthy`;
+      } else {
+        pill.className = "badge bg-warning-subtle text-warning border";
+        pill.textContent = "Degraded";
+      }
+    } catch (e) {
+      document.getElementById("db-health-pill").textContent = "Offline";
+    }
+  });
+</script>
+{% endblock %}
+

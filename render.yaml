@@ -1,0 +1,28 @@
+services:
+  - type: web
+    name: predictive-maintenance-intelligence
+    env: python
+    region: oregon
+    plan: free
+    buildCommand: pip install -r requirements.txt
+    startCommand: gunicorn wsgi:app --bind 0.0.0.0:$PORT --workers 1 --threads 2 --timeout 120
+    envVars:
+      - key: FLASK_ENV
+        value: production
+      - key: SECRET_KEY
+        generateValue: true
+      - key: DATABASE_PATH
+        value: database/predictive_maintenance.db
+      - key: TOOL_WEAR_ALERT_THRESHOLD
+        value: "200.0"
+      - key: TORQUE_ALERT_THRESHOLD
+        value: "55.0"
+      - key: ROTATIONAL_SPEED_LOW_THRESHOLD
+        value: "1300.0"
+      - key: TEMP_DIFF_LOW_THRESHOLD
+        value: "8.0"
+      - key: RISK_LOW_CEILING
+        value: "20.0"
+      - key: RISK_MEDIUM_CEILING
+        value: "40.0"
+

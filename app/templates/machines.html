@@ -1,0 +1,226 @@
+{% extends "base.html" %}
+
+{% block title %}Machine Monitoring{% endblock %}
+{% block page_title %}Fleet Machine Monitoring &amp; Equipment Registry{% endblock %}
+
+{% block header_actions %}
+<div class="d-flex gap-2">
+  <button type="button" class="btn-primary-custom" data-bs-toggle="modal" data-bs-target="#registerMachineModal">
+    <i class="bi bi-plus-lg"></i>
+    <span>Register Machine</span>
+  </button>
+  <a href="{{ url_for('api.download_fleet_csv') }}" class="btn-secondary-custom">
+    <i class="bi bi-download"></i>
+    <span>Export CSV</span>
+  </a>
+</div>
+{% endblock %}
+
+{% block content %}
+<div class="container-fluid p-0">
+
+  <!-- Filter & Search Toolbar -->
+  <div class="app-card mb-4">
+    <div class="row g-2 align-items-center">
+      <div class="col-12 col-md-5">
+        <div class="input-group">
+          <span class="input-group-text bg-white border-end-0 text-muted">
+            <i class="bi bi-search"></i>
+          </span>
+          <input type="text" id="machine-search" class="form-control-custom border-start-0" placeholder="Search equipment by name or ID...">
+        </div>
+      </div>
+      
+      <div class="col-6 col-md-3">
+        <select id="machine-type-filter" class="form-select-custom">
+          <option value="">All Equipment Types (L, M, H)</option>
+          <option value="L">Type L (Light Duty)</option>
+          <option value="M">Type M (Medium Duty)</option>
+          <option value="H">Type H (Heavy Duty)</option>
+        </select>
+      </div>
+
+      <div class="col-6 col-md-3">
+        <select id="machine-status-filter" class="form-select-custom">
+          <option value="">All Health Statuses</option>
+          <option value="NORMAL">Normal Operation</option>
+          <option value="FAILURE RISK">Failure Risk Alerts</option>
+        </select>
+      </div>
+
+      <div class="col-12 col-md-1 text-md-end">
+        <button id="reset-filters-btn" class="btn btn-sm btn-outline-secondary w-100" title="Reset Filters">
+          <i class="bi bi-arrow-counterclockwise"></i>
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Machine Inventory Table -->
+  <div class="app-card">
+    <div class="card-header-clean">
+      <h2><i class="bi bi-hdd-stack text-primary"></i> Registered Equipment Units (<span id="machine-count">0</span>)</h2>
+    </div>
+
+    <div class="table-responsive">
+      <table class="table-industrial">
+        <thead>
+          <tr>
+            <th>Machine ID</th>
+            <th>Equipment Name</th>
+            <th>Variant Type</th>
+            <th>Latest Probability</th>
+            <th>Health Status</th>
+            <th>Latest Sensor Telemetry</th>
+            <th>Last Assessed</th>
+            <th class="text-end">Actions</th>
+          </tr>
+        </thead>
+        <tbody id="machines-tbody">
+          <tr>
+            <td colspan="8" class="text-center py-4">
+              <span class="loading-spinner"></span>
+              <div class="text-muted mt-2 small">Loading fleet equipment...</div>
+            </td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+</div>
+
+<!-- Modal: Register Machine -->
+<div class="modal fade" id="registerMachineModal" tabindex="-1" aria-labelledby="registerModalLabel" aria-hidden="true">
+  <div class="modal-dialog modal-dialog-centered">
+    <div class="modal-content border-0 shadow">
+      <div class="modal-header border-bottom">
+        <h5 class="modal-title fs-6 fw-bold text-primary" id="registerModalLabel">
+          <i class="bi bi-plus-circle me-1 text-primary"></i> Register New Industrial Machine
+        </h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+      </div>
+      <form id="register-machine-form">
+        <div class="modal-body p-4">
+          <div class="mb-3">
+            <label class="form-label-custom" for="reg-machine-name">Machine Identifier / Name <span class="text-danger">*</span></label>
+            <input type="text" id="reg-machine-name" class="form-control-custom" placeholder="e.g. CNC Lathe Line 04" required>
+            <div class="form-help">Must be a unique industrial equipment identifier.</div>
+          </div>
+          <div class="mb-3">
+            <label class="form-label-custom" for="reg-machine-type">Equipment Variant Type <span class="text-danger">*</span></label>
+            <select id="reg-machine-type" class="form-select-custom" required>
+              <option value="" disabled selected>Select variant rating...</option>
+              <option value="L">Type L &bull; Light Duty (50% of production)</option>
+              <option value="M">Type M &bull; Medium Duty (30% of production)</option>
+              <option value="H">Type H &bull; Heavy Duty (20% of production)</option>
+            </select>
+            <div class="form-help">Type determines metallurgical and power duty tolerances.</div>
+          </div>
+        </div>
+        <div class="modal-footer border-top bg-light">
+          <button type="button" class="btn btn-sm btn-outline-secondary" data-bs-dismiss="modal">Cancel</button>
+          <button type="submit" class="btn-primary-custom btn-sm" id="btn-save-machine">
+            <i class="bi bi-check-lg"></i>
+            <span>Register Equipment</span>
+          </button>
+        </div>
+      </form>
+    </div>
+  </div>
+</div>
+
+<!-- Modal: Machine History & Telemetry -->
+<div class="modal fade" id="machineHistoryModal" tabindex="-1" aria-labelledby="historyModalLabel" aria-hidden="true">
+  <div class="modal-dialog modal-xl modal-dialog-centered modal-dialog-scrollable">
+    <div class="modal-content border-0 shadow">
+      <div class="modal-header border-bottom">
+        <h5 class="modal-title fs-6 fw-bold text-primary" id="historyModalLabel">
+          <i class="bi bi-clock-history me-1 text-primary"></i> Equipment Diagnostics History &bull; <span id="history-modal-machine-name"></span>
+        </h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+      </div>
+      <div class="modal-body p-4">
+        <!-- Machine Metadata Summary -->
+        <div class="row g-2 mb-3 p-3 bg-light rounded" id="history-machine-meta"></div>
+
+        <!-- History Tabs -->
+        <ul class="nav nav-tabs mb-3" id="historyTabs" role="tablist">
+          <li class="nav-item">
+            <button class="nav-link active" id="predictions-tab" data-bs-toggle="tab" data-bs-target="#tab-predictions">
+              <i class="bi bi-cpu me-1"></i> Predictions Log
+            </button>
+          </li>
+          <li class="nav-item">
+            <button class="nav-link" id="sensors-tab" data-bs-toggle="tab" data-bs-target="#tab-sensors">
+              <i class="bi bi-activity me-1"></i> Sensor Telemetry
+            </button>
+          </li>
+          <li class="nav-item">
+            <button class="nav-link" id="tasks-tab" data-bs-toggle="tab" data-bs-target="#tab-tasks">
+              <i class="bi bi-tools me-1"></i> Maintenance Records
+            </button>
+          </li>
+        </ul>
+
+        <div class="tab-content">
+          <!-- Predictions tab -->
+          <div class="tab-pane fade show active" id="tab-predictions">
+            <div class="table-responsive">
+              <table class="table-industrial">
+                <thead>
+                  <tr>
+                    <th>Prediction ID</th>
+                    <th>Failure Probability</th>
+                    <th>Status</th>
+                    <th>Risk Tier</th>
+                    <th>Recommendations</th>
+                    <th>Timestamp</th>
+                  </tr>
+                </thead>
+                <tbody id="history-predictions-tbody"></tbody>
+              </table>
+            </div>
+          </div>
+
+          <!-- Sensors tab -->
+          <div class="tab-pane fade" id="tab-sensors">
+            <div class="table-responsive">
+              <table class="table-industrial">
+                <thead>
+                  <tr>
+                    <th>Reading ID</th>
+                    <th>Air Temp [K]</th>
+                    <th>Process Temp [K]</th>
+                    <th>Spindle [rpm]</th>
+                    <th>Torque [Nm]</th>
+                    <th>Tool Wear [min]</th>
+                    <th>Recorded At</th>
+                  </tr>
+                </thead>
+                <tbody id="history-sensors-tbody"></tbody>
+              </table>
+            </div>
+          </div>
+
+          <!-- Tasks tab -->
+          <div class="tab-pane fade" id="tab-tasks">
+            <div id="history-tasks-container"></div>
+          </div>
+        </div>
+      </div>
+      <div class="modal-footer border-top bg-light">
+        <a id="btn-modal-pdf" href="#" target="_blank" class="btn btn-sm btn-outline-primary">
+          <i class="bi bi-file-earmark-pdf me-1"></i> Download PDF Certificate
+        </a>
+        <button type="button" class="btn btn-sm btn-secondary" data-bs-dismiss="modal">Close</button>
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script src="{{ url_for('static', filename='js/machines.js') }}"></script>
+{% endblock %}
+

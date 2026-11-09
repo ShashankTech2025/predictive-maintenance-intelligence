@@ -1,0 +1,114 @@
+{% extends "base.html" %}
+
+{% block title %}Reports &amp; Documentation{% endblock %}
+{% block page_title %}Fleet Health &amp; Maintenance Reports Portal{% endblock %}
+
+{% block content %}
+<div class="container-fluid p-0">
+
+  <!-- Download Hub Cards -->
+  <div class="row g-4 mb-4">
+    <!-- CSV Export Card -->
+    <div class="col-12 col-md-6">
+      <div class="app-card h-100 d-flex flex-column justify-content-between">
+        <div>
+          <div class="d-flex align-items-center gap-2 mb-3">
+            <div class="kpi-icon-wrap kpi-blue" style="width: 44px; height: 44px;">
+              <i class="bi bi-file-earmark-spreadsheet-fill fs-4"></i>
+            </div>
+            <div>
+              <h2 class="fs-6 fw-bold text-primary m-0">Fleet Telemetry &amp; Health CSV</h2>
+              <small class="text-muted">Standard RFC-4180 Industrial Dataset Export</small>
+            </div>
+          </div>
+          <p class="text-secondary small mb-3">
+            Exports a consolidated, comma-separated spreadsheet of all registered factory units, latest sensory observations (temperatures, speed, torque, tool wear), XGBoost failure probability scores, and maintenance directives.
+          </p>
+          <ul class="text-muted small ps-3 mb-4">
+            <li>Compatible with Microsoft Excel, Tableau, Power BI &amp; Python Pandas.</li>
+            <li>Includes historical timestamps and equipment variant classifications.</li>
+          </ul>
+        </div>
+
+        <div>
+          <a href="{{ url_for('api.download_fleet_csv') }}" class="btn-primary-custom w-100 justify-content-center">
+            <i class="bi bi-cloud-arrow-down-fill"></i>
+            <span>Download Fleet CSV Export</span>
+          </a>
+        </div>
+      </div>
+    </div>
+
+    <!-- PDF Inspection Certificate Card -->
+    <div class="col-12 col-md-6">
+      <div class="app-card h-100 d-flex flex-column justify-content-between">
+        <div>
+          <div class="d-flex align-items-center gap-2 mb-3">
+            <div class="kpi-icon-wrap kpi-red" style="width: 44px; height: 44px;">
+              <i class="bi bi-file-earmark-pdf-fill fs-4"></i>
+            </div>
+            <div>
+              <h2 class="fs-6 fw-bold text-primary m-0">Machine Inspection Certificate (PDF)</h2>
+              <small class="text-muted">Official Engineering Health Certificate</small>
+            </div>
+          </div>
+          <p class="text-secondary small mb-3">
+            Generates a publication-grade PDF engineering certificate generated via ReportLab with executive assessment status, sensor telemetry parameter table, risk tier, action items, and SHAP feature drivers.
+          </p>
+          
+          <div class="mb-3">
+            <label class="form-label-custom" for="report-machine-select">Select Equipment Unit</label>
+            <select id="report-machine-select" class="form-select-custom">
+              <option value="" disabled selected>Loading registered units...</option>
+            </select>
+          </div>
+        </div>
+
+        <div>
+          <button type="button" class="btn-primary-custom w-100 justify-content-center" id="btn-download-selected-pdf">
+            <i class="bi bi-file-pdf-fill"></i>
+            <span>Generate &amp; Download PDF Certificate</span>
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Fleet Report Inventory Table -->
+  <div class="app-card">
+    <div class="card-header-clean">
+      <h2><i class="bi bi-folder-check text-primary"></i> Machine Health Reports Library</h2>
+    </div>
+
+    <div class="table-responsive">
+      <table class="table-industrial">
+        <thead>
+          <tr>
+            <th>Machine ID</th>
+            <th>Equipment Name</th>
+            <th>Type</th>
+            <th>Current Failure Risk</th>
+            <th>Operational Status</th>
+            <th>Last Assessed</th>
+            <th class="text-end">Download Report</th>
+          </tr>
+        </thead>
+        <tbody id="reports-library-tbody">
+          <tr>
+            <td colspan="7" class="text-center py-4">
+              <span class="loading-spinner"></span>
+              <div class="text-muted mt-2 small">Loading reports catalog...</div>
+            </td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script src="{{ url_for('static', filename='js/reports.js') }}"></script>
+{% endblock %}
+

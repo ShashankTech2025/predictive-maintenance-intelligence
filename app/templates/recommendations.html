@@ -1,0 +1,119 @@
+{% extends "base.html" %}
+
+{% block title %}Maintenance Recommendations{% endblock %}
+{% block page_title %}Maintenance Directives &amp; Action Task Board{% endblock %}
+
+{% block content %}
+<div class="container-fluid p-0">
+
+  <!-- Summary Metric Counters -->
+  <div class="row g-3 mb-4">
+    <div class="col-6 col-md-3">
+      <div class="kpi-card py-3">
+        <div>
+          <div class="kpi-label">Total Directives</div>
+          <div class="kpi-value fs-3" id="maint-total-count">0</div>
+        </div>
+        <div class="kpi-icon-wrap kpi-blue" style="width: 40px; height: 40px;">
+          <i class="bi bi-tools fs-5"></i>
+        </div>
+      </div>
+    </div>
+
+    <div class="col-6 col-md-3">
+      <div class="kpi-card py-3">
+        <div>
+          <div class="kpi-label">Pending Action</div>
+          <div class="kpi-value fs-3 text-danger" id="maint-pending-count">0</div>
+        </div>
+        <div class="kpi-icon-wrap kpi-red" style="width: 40px; height: 40px;">
+          <i class="bi bi-hourglass-split fs-5"></i>
+        </div>
+      </div>
+    </div>
+
+    <div class="col-6 col-md-3">
+      <div class="kpi-card py-3">
+        <div>
+          <div class="kpi-label">In Progress</div>
+          <div class="kpi-value fs-3 text-warning" id="maint-progress-count">0</div>
+        </div>
+        <div class="kpi-icon-wrap kpi-amber" style="width: 40px; height: 40px;">
+          <i class="bi bi-gear-fill fs-5"></i>
+        </div>
+      </div>
+    </div>
+
+    <div class="col-6 col-md-3">
+      <div class="kpi-card py-3">
+        <div>
+          <div class="kpi-label">Resolved Tasks</div>
+          <div class="kpi-value fs-3 text-success" id="maint-resolved-count">0</div>
+        </div>
+        <div class="kpi-icon-wrap kpi-green" style="width: 40px; height: 40px;">
+          <i class="bi bi-check-circle-fill fs-5"></i>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Filter Bar -->
+  <div class="app-card mb-4">
+    <div class="row g-2 align-items-center">
+      <div class="col-12 col-md-5">
+        <div class="input-group">
+          <span class="input-group-text bg-white border-end-0 text-muted"><i class="bi bi-search"></i></span>
+          <input type="text" id="maint-search" class="form-control-custom border-start-0" placeholder="Filter tasks by machine or action item...">
+        </div>
+      </div>
+
+      <div class="col-6 col-md-3">
+        <select id="maint-status-filter" class="form-select-custom">
+          <option value="">All Lifecycle Statuses</option>
+          <option value="PENDING" selected>Pending Action</option>
+          <option value="IN_PROGRESS">In Progress</option>
+          <option value="RESOLVED">Resolved / Completed</option>
+        </select>
+      </div>
+
+      <div class="col-6 col-md-3">
+        <select id="maint-priority-filter" class="form-select-custom">
+          <option value="">All Priorities (High, Medium, Low)</option>
+          <option value="HIGH">High Priority Only</option>
+          <option value="MEDIUM">Medium Priority Only</option>
+          <option value="LOW">Low Priority Only</option>
+        </select>
+      </div>
+
+      <div class="col-12 col-md-1 text-md-end">
+        <button id="maint-reset-btn" class="btn btn-sm btn-outline-secondary w-100" title="Reset Filters">
+          <i class="bi bi-arrow-counterclockwise"></i>
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Maintenance Directives Task Board -->
+  <div class="app-card">
+    <div class="card-header-clean">
+      <h2><i class="bi bi-clipboard-check text-primary"></i> Actionable Directives (<span id="filtered-task-count">0</span>)</h2>
+      <button class="btn btn-sm btn-outline-secondary" onclick="loadMaintenanceData()">
+        <i class="bi bi-arrow-clockwise"></i> Refresh
+      </button>
+    </div>
+
+    <div id="maintenance-tasks-container">
+      <div class="text-center py-5">
+        <span class="loading-spinner"></span>
+        <div class="text-muted mt-2 small">Loading maintenance task queue...</div>
+      </div>
+    </div>
+  </div>
+
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script src="{{ url_for('static', filename='js/maintenance.js') }}"></script>
+{% endblock %}
+

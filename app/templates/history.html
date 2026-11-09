@@ -1,0 +1,81 @@
+{% extends "base.html" %}
+
+{% block title %}Prediction History{% endblock %}
+{% block page_title %}Prediction Logs &amp; Diagnostic Audit Trail{% endblock %}
+
+{% block header_actions %}
+<a href="{{ url_for('api.download_fleet_csv') }}" class="btn-secondary-custom">
+  <i class="bi bi-download"></i>
+  <span>Export History (CSV)</span>
+</a>
+{% endblock %}
+
+{% block content %}
+<div class="container-fluid p-0">
+
+  <!-- Search & Filter Bar -->
+  <div class="app-card mb-4">
+    <div class="row g-2 align-items-center">
+      <div class="col-12 col-md-6">
+        <div class="input-group">
+          <span class="input-group-text bg-white border-end-0 text-muted"><i class="bi bi-search"></i></span>
+          <input type="text" id="history-search" class="form-control-custom border-start-0" placeholder="Search logs by machine name...">
+        </div>
+      </div>
+
+      <div class="col-6 col-md-4">
+        <select id="history-status-filter" class="form-select-custom">
+          <option value="">All Prediction Statuses</option>
+          <option value="NORMAL">Normal Status Only</option>
+          <option value="FAILURE RISK">Failure Risk Alerts Only</option>
+        </select>
+      </div>
+
+      <div class="col-6 col-md-2 text-md-end">
+        <button id="history-reset-btn" class="btn btn-sm btn-outline-secondary w-100" title="Reset Filters">
+          <i class="bi bi-arrow-counterclockwise"></i> Reset
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Historical Log Table -->
+  <div class="app-card">
+    <div class="card-header-clean">
+      <h2><i class="bi bi-clock-history text-primary"></i> Historical Prediction Records (<span id="history-count">0</span>)</h2>
+    </div>
+
+    <div class="table-responsive">
+      <table class="table-industrial">
+        <thead>
+          <tr>
+            <th>Log ID</th>
+            <th>Machine Unit</th>
+            <th>Variant</th>
+            <th>Failure Probability</th>
+            <th>Predicted Status</th>
+            <th>Risk Tier</th>
+            <th>Maintenance Directives</th>
+            <th>Logged At</th>
+            <th class="text-end">Certificate</th>
+          </tr>
+        </thead>
+        <tbody id="history-tbody">
+          <tr>
+            <td colspan="9" class="text-center py-4">
+              <span class="loading-spinner"></span>
+              <div class="text-muted mt-2 small">Loading prediction history...</div>
+            </td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script src="{{ url_for('static', filename='js/history.js') }}"></script>
+{% endblock %}
+
