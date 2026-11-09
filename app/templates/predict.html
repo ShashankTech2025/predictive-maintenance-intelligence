@@ -6,9 +6,9 @@
 {% block content %}
 <div class="container-fluid p-0">
   
-  <div class="row g-4">
+  <div class="row g-3 g-lg-4">
     <!-- Left Column: Input Form -->
-    <div class="col-12 col-xl-5">
+    <div class="col-12 col-lg-5">
       <div class="app-card">
         <div class="card-header-clean">
           <h2><i class="bi bi-sliders text-primary"></i> Sensor Telemetry Input</h2>
@@ -125,19 +125,116 @@
     </div>
 
     <!-- Right Column: Prediction Assessment & Diagnostics -->
-    <div class="col-12 col-xl-7">
+    <div class="col-12 col-lg-7">
       
-      <!-- Initial Placeholder State -->
-      <div id="results-placeholder" class="app-card h-100 d-flex flex-column align-items-center justify-content-center text-center p-5">
-        <div class="empty-state">
-          <i class="bi bi-cpu fs-1 text-primary"></i>
-          <h3>Ready for Diagnostics</h3>
-          <p>
-            Select a machine and input sensor telemetry readings on the left, or choose a simulation preset to generate failure predictions and SHAP explainability insights.
-          </p>
-          <div class="badge bg-light text-muted border p-2">
-            Classification Threshold: <b>0.40 (40.0%)</b> &bull; Model: <b>XGBoost</b>
+      <!-- Initial Placeholder State (Compact, Professional & Balanced) -->
+      <div id="results-placeholder" class="app-card mb-3">
+        <div class="card-header-clean">
+          <h2>
+            <i class="bi bi-speedometer2 text-primary"></i>
+            <span>Diagnostic Intelligence Console</span>
+          </h2>
+          <span class="badge bg-light text-primary border" style="font-size: 0.72rem; font-weight: 600;">
+            <i class="bi bi-broadcast text-success me-1"></i> Engine Standby
+          </span>
+        </div>
+
+        <!-- Standby Notification Banner -->
+        <div class="diagnostic-standby-banner mb-3 p-3 rounded">
+          <div class="d-flex align-items-start gap-3">
+            <div class="standby-icon-box">
+              <i class="bi bi-cpu-fill"></i>
+            </div>
+            <div class="flex-grow-1">
+              <h3 class="fs-6 fw-bold text-primary mb-1">Awaiting Sensor Telemetry Input</h3>
+              <p class="text-secondary small mb-0">
+                Select a machine or pick a <strong>Quick Simulation Preset</strong> on the left, then click <strong>Run Predictive Failure Analysis</strong> to generate calibrated risk probability and SHAP explainability.
+              </p>
+            </div>
           </div>
+        </div>
+
+        <!-- 3-Step Analysis Pipeline Guide -->
+        <div class="row g-2 mb-3">
+          <div class="col-12 col-sm-4">
+            <div class="workflow-step-pill">
+              <span class="step-num">1</span>
+              <div>
+                <div class="step-title">Ingest Telemetry</div>
+                <small class="text-muted" style="font-size: 0.7rem;">5 Sensor Channels</small>
+              </div>
+            </div>
+          </div>
+          <div class="col-12 col-sm-4">
+            <div class="workflow-step-pill">
+              <span class="step-num">2</span>
+              <div>
+                <div class="step-title">XGBoost Scoring</div>
+                <small class="text-muted" style="font-size: 0.7rem;">Decision Boundary 0.40</small>
+              </div>
+            </div>
+          </div>
+          <div class="col-12 col-sm-4">
+            <div class="workflow-step-pill">
+              <span class="step-num">3</span>
+              <div>
+                <div class="step-title">XAI &amp; Directives</div>
+                <small class="text-muted" style="font-size: 0.7rem;">SHAP + Actions</small>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Baseline Reference Envelope -->
+        <div class="p-3 rounded mb-3 bg-light border">
+          <div class="d-flex align-items-center justify-content-between mb-2">
+            <span class="text-uppercase fw-bold text-secondary" style="font-size: 0.7rem; letter-spacing: 0.05em;">
+              <i class="bi bi-shield-check text-success me-1"></i> OEM Baseline Operational Limits
+            </span>
+            <span class="badge bg-white text-muted border" style="font-size: 0.68rem;">Normal Reference</span>
+          </div>
+          <div class="row g-2">
+            <div class="col-6 col-sm-3">
+              <div class="p-2 bg-white rounded border text-center">
+                <small class="text-muted d-block" style="font-size: 0.7rem;">Tool Wear</small>
+                <strong class="text-primary" style="font-size: 0.82rem;">&lt; 200 min</strong>
+              </div>
+            </div>
+            <div class="col-6 col-sm-3">
+              <div class="p-2 bg-white rounded border text-center">
+                <small class="text-muted d-block" style="font-size: 0.7rem;">Drive Torque</small>
+                <strong class="text-primary" style="font-size: 0.82rem;">&lt; 55.0 Nm</strong>
+              </div>
+            </div>
+            <div class="col-6 col-sm-3">
+              <div class="p-2 bg-white rounded border text-center">
+                <small class="text-muted d-block" style="font-size: 0.7rem;">Rotational Speed</small>
+                <strong class="text-primary" style="font-size: 0.82rem;">&gt; 1,300 rpm</strong>
+              </div>
+            </div>
+            <div class="col-6 col-sm-3">
+              <div class="p-2 bg-white rounded border text-center">
+                <small class="text-muted d-block" style="font-size: 0.7rem;">Thermal Delta (&Delta;T)</small>
+                <strong class="text-primary" style="font-size: 0.82rem;">&gt; 8.0 K</strong>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Technical Model Specs Badge Bar -->
+        <div class="d-flex flex-wrap align-items-center justify-content-between gap-2 pt-2 border-top">
+          <div class="d-flex flex-wrap gap-2">
+            <span class="badge bg-light text-secondary border" style="font-size: 0.72rem;">
+              <i class="bi bi-cpu text-primary me-1"></i> XGBClassifier
+            </span>
+            <span class="badge bg-light text-secondary border" style="font-size: 0.72rem;">
+              <i class="bi bi-bullseye text-warning me-1"></i> Threshold: 40.0%
+            </span>
+            <span class="badge bg-light text-secondary border" style="font-size: 0.72rem;">
+              <i class="bi bi-bar-chart-steps text-info me-1"></i> SHAP TreeExplainer
+            </span>
+          </div>
+          <small class="text-muted" style="font-size: 0.72rem;">Real-time Telemetry Ingestion</small>
         </div>
       </div>
 

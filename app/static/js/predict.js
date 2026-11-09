@@ -12,6 +12,17 @@ document.addEventListener("DOMContentLoaded", () => {
   document.getElementById("prediction-form").addEventListener("submit", handlePredictionSubmit);
   document.getElementById("btn-reset-prediction").addEventListener("click", resetPredictionView);
   document.getElementById("pred-machine-select").addEventListener("change", handleMachineSelectChange);
+
+  // Optional automated testing query parameter
+  const urlParams = new URLSearchParams(window.location.search);
+  if (urlParams.get("auto_simulate")) {
+    setTimeout(() => {
+      const presetBtn = document.getElementById("preset-high-risk");
+      if (presetBtn) presetBtn.click();
+      const form = document.getElementById("prediction-form");
+      if (form) form.requestSubmit();
+    }, 600);
+  }
 });
 
 async function initMachineSelector() {
@@ -275,6 +286,7 @@ function renderShapChart(xai) {
   }];
 
   const layout = {
+    autosize: true,
     margin: { t: 10, b: 30, l: 160, r: 20 },
     paper_bgcolor: "transparent",
     plot_bgcolor: "transparent",
@@ -294,7 +306,7 @@ function renderShapChart(xai) {
 
 function resetPredictionView() {
   document.getElementById("results-panel").style.display = "none";
-  document.getElementById("results-placeholder").style.display = "flex";
+  document.getElementById("results-placeholder").style.display = "block";
   window.scrollTo({ top: 0, behavior: "smooth" });
 }
 
